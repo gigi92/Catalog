@@ -126,7 +126,20 @@ namespace d_layer
             a.DataSource = dt;
             a.Visible = true;
         }
-        
+        public void afisare_absente(int nr, DataGridView a,int id)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT data FROM dbo.tabel_absente where id_materie=" + nr + " and id_student=" + id + "";
+            cmd.CommandType = CommandType.Text;
+            connection.Open();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
+            connection.Close();
+            a.DataSource = dt;
+            a.Visible = true;
+        }
         public void afisare_elevi_materie(int id_mat,DataGridView a)
         {
              initializare_conn();
@@ -184,9 +197,146 @@ namespace d_layer
             cmd.ExecuteReader();
             connection.Close();
         }
-        
-        
-        
+        public float get_medie(DataGridView a,int p1,int p2)
+        {
+            float id_curs=0, id_lab=0;
+            int nr_lin = Int32.Parse(a.Rows.Count.ToString());
+            for (int aux = 0; aux < nr_lin - 1; aux++)
+            {
+                id_curs = id_curs + float.Parse(a.Rows[aux].Cells["nota_curs"].Value.ToString());
+                id_lab = id_lab + float.Parse(a.Rows[aux].Cells["nota_laborator"].Value.ToString());
+            }
+             return (id_curs * p1 / 100 + id_lab * p2 / 100) / (nr_lin - 1);
+        }
+        public float get_medie2(DataGridView a,int id_std,int id_med)
+        {
+            float medie=0;
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT dbo.tabel_materie.medie FROM dbo.tabel_materie WHERE dbo.tabel_materie.id_student=" + id_std + " and dbo.tabel_materie.id_materie="+id_med+" ";
+            cmd.CommandType = CommandType.Text;
+            connection.Open();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
+            connection.Close();
+            medie =float.Parse( dt.Rows[0][0].ToString());
+            return medie;
+        }
+        public int get_nr_abs(DataGridView a)
+        {
+            int abs=0;
+            abs =Convert.ToInt32( a.Rows.Count.ToString());
+            return abs-1;
+        }
+        public void add_nota(float nota_c, float nota_l,int id_mat,int id_std)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.add_nota";
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@id_std";
+            a.SqlDbType = SqlDbType.Int;
+            a.Value = id_std;
+            cmd.Parameters.Add(a);
+
+            SqlParameter b = new SqlParameter();
+            b.ParameterName = "@id_mat";
+            b.SqlDbType = SqlDbType.Int;
+            b.Value = id_mat;
+            cmd.Parameters.Add(b);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@nota_c";
+            c.SqlDbType = SqlDbType.Float;
+            c.Value = nota_c;
+            cmd.Parameters.Add(c);
+
+            SqlParameter d = new SqlParameter();
+            d.ParameterName = "@nota_l";
+            d.SqlDbType = SqlDbType.Float;
+            d.Value = nota_l;
+            cmd.Parameters.Add(d);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
+        public void update_nota(float nota_c, float nota_l, int id_mat, int id_std,int id_nota)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.update_nota";
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@id_std";
+            a.SqlDbType = SqlDbType.Int;
+            a.Value = id_std;
+            cmd.Parameters.Add(a);
+
+            SqlParameter b = new SqlParameter();
+            b.ParameterName = "@id_mat";
+            b.SqlDbType = SqlDbType.Int;
+            b.Value = id_mat;
+            cmd.Parameters.Add(b);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@nota_c";
+            c.SqlDbType = SqlDbType.Float;
+            c.Value = nota_c;
+            cmd.Parameters.Add(c);
+
+            SqlParameter d = new SqlParameter();
+            d.ParameterName = "@nota_l";
+            d.SqlDbType = SqlDbType.Float;
+            d.Value = nota_l;
+            cmd.Parameters.Add(d);
+
+            SqlParameter e = new SqlParameter();
+            e.ParameterName = "@id_nota";
+            e.SqlDbType = SqlDbType.Int;
+            e.Value = id_nota;
+            cmd.Parameters.Add(e);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
+        public void delete_nota( int id_nota)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.delete_nota";
+            cmd.CommandType = CommandType.StoredProcedure;
+            
+            SqlParameter e = new SqlParameter();
+            e.ParameterName = "@id_nota";
+            e.SqlDbType = SqlDbType.Int;
+            e.Value = id_nota;
+            cmd.Parameters.Add(e);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
+        public void delete_absenta(DateTime absenta)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.delete_absenta";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter e = new SqlParameter();
+            e.ParameterName = "@absenta";
+            e.SqlDbType = SqlDbType.DateTime;
+            e.Value = absenta;
+            cmd.Parameters.Add(e);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
         public void add_absenta(DateTime data, int id_mat, int id_std)
         {
             initializare_conn();
