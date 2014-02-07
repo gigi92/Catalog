@@ -97,115 +97,96 @@ namespace d_layer
             a.DataSource = dt;
             connection.Close();
         }
-      
-        public void add_nota(float nota_c, float nota_l,int id_mat,int id_std)
+        public void afisare_materii(DataGridView a, int id)
         {
             initializare_conn();
             SqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "dbo.add_nota";
-            cmd.CommandType = CommandType.StoredProcedure;
-            SqlParameter a = new SqlParameter();
-            a.ParameterName = "@id_std";
-            a.SqlDbType = SqlDbType.Int;
-            a.Value = id_std;
-            cmd.Parameters.Add(a);
-
-            SqlParameter b = new SqlParameter();
-            b.ParameterName = "@id_mat";
-            b.SqlDbType = SqlDbType.Int;
-            b.Value = id_mat;
-            cmd.Parameters.Add(b);
-
-            SqlParameter c = new SqlParameter();
-            c.ParameterName = "@nota_c";
-            c.SqlDbType = SqlDbType.Float;
-            c.Value = nota_c;
-            cmd.Parameters.Add(c);
-
-            SqlParameter d = new SqlParameter();
-            d.ParameterName = "@nota_l";
-            d.SqlDbType = SqlDbType.Float;
-            d.Value = nota_l;
-            cmd.Parameters.Add(d);
-
+            cmd.CommandText = "SELECT nume_materie,id_materie FROM dbo.tabel_materie where id_student="+id+"";
+            cmd.CommandType = CommandType.Text;
             connection.Open();
-            cmd.ExecuteReader();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
             connection.Close();
-        }
-        public void update_nota(float nota_c, float nota_l, int id_mat, int id_std,int id_nota)
-        {
-            initializare_conn();
-            SqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "dbo.update_nota";
-            cmd.CommandType = CommandType.StoredProcedure;
-            SqlParameter a = new SqlParameter();
-            a.ParameterName = "@id_std";
-            a.SqlDbType = SqlDbType.Int;
-            a.Value = id_std;
-            cmd.Parameters.Add(a);
-
-            SqlParameter b = new SqlParameter();
-            b.ParameterName = "@id_mat";
-            b.SqlDbType = SqlDbType.Int;
-            b.Value = id_mat;
-            cmd.Parameters.Add(b);
-
-            SqlParameter c = new SqlParameter();
-            c.ParameterName = "@nota_c";
-            c.SqlDbType = SqlDbType.Float;
-            c.Value = nota_c;
-            cmd.Parameters.Add(c);
-
-            SqlParameter d = new SqlParameter();
-            d.ParameterName = "@nota_l";
-            d.SqlDbType = SqlDbType.Float;
-            d.Value = nota_l;
-            cmd.Parameters.Add(d);
-
-            SqlParameter e = new SqlParameter();
-            e.ParameterName = "@id_nota";
-            e.SqlDbType = SqlDbType.Int;
-            e.Value = id_nota;
-            cmd.Parameters.Add(e);
-
-            connection.Open();
-            cmd.ExecuteReader();
-            connection.Close();
-        }
-        public void delete_nota( int id_nota)
-        {
-            initializare_conn();
-            SqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "dbo.delete_nota";
-            cmd.CommandType = CommandType.StoredProcedure;
+            a.DataSource = dt;
+            a.Visible = true;
             
-            SqlParameter e = new SqlParameter();
-            e.ParameterName = "@id_nota";
-            e.SqlDbType = SqlDbType.Int;
-            e.Value = id_nota;
-            cmd.Parameters.Add(e);
-
-            connection.Open();
-            cmd.ExecuteReader();
-            connection.Close();
         }
-        public void delete_absenta(DateTime absenta)
+        public void afisare_note(int nr, DataGridView a,int id)
         {
             initializare_conn();
             SqlCommand cmd = connection.CreateCommand();
-            cmd.CommandText = "dbo.delete_absenta";
+            cmd.CommandText = "SELECT id_nota,nota_curs,nota_laborator FROM dbo.tabel_note where id_materie=" + nr + " and id_student="+id+"";
+            cmd.CommandType = CommandType.Text;
+            connection.Open();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
+            connection.Close();
+            a.DataSource = dt;
+            a.Visible = true;
+        }
+        
+        public void afisare_elevi_materie(int id_mat,DataGridView a)
+        {
+             initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT dbo.tabel_studenti.nume,dbo.tabel_studenti.prenume,dbo.tabel_studenti.id_student,id_materie FROM dbo.tabel_studenti INNER JOIN dbo.tabel_materie ON dbo.tabel_studenti.id_student=dbo.tabel_materie.id_student WHERE dbo.tabel_materie.id_materie=" + id_mat + " GROUP BY id_materie,nume,prenume,dbo.tabel_studenti.id_student;";
+            cmd.CommandType = CommandType.Text;
+            connection.Open();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
+            connection.Close();
+            a.DataSource = dt;
+           
+
+        }
+        public void calculare_medie()
+        {
+
+        }
+        public int get_id_from_mat(DataGridView a,int i )
+        {
+            
+            DataGridViewRow row = a.Rows[i];
+            return Convert.ToInt32(row.Cells["id_materie"].Value.ToString());
+
+
+
+        }
+        public void update_medie(int std, int materie,float medie)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.update_medie";
             cmd.CommandType = CommandType.StoredProcedure;
 
-            SqlParameter e = new SqlParameter();
-            e.ParameterName = "@absenta";
-            e.SqlDbType = SqlDbType.DateTime;
-            e.Value = absenta;
-            cmd.Parameters.Add(e);
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@id_std";
+            a.SqlDbType = SqlDbType.Int;
+            a.Value = std;
+            cmd.Parameters.Add(a);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@id_mat";
+            c.SqlDbType = SqlDbType.Int;
+            c.Value = materie;
+            cmd.Parameters.Add(c);
+
+            SqlParameter d = new SqlParameter();
+            d.ParameterName = "@medie";
+            d.SqlDbType = SqlDbType.Float;
+            d.Value = medie;
+            cmd.Parameters.Add(d);
 
             connection.Open();
             cmd.ExecuteReader();
             connection.Close();
         }
+        
+        
+        
         public void add_absenta(DateTime data, int id_mat, int id_std)
         {
             initializare_conn();
@@ -249,7 +230,147 @@ namespace d_layer
             connection.Close();
             return dt;
         }
-       
+        public void add_user(String nume_user, String parola, int id_permisiune)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.add_user";
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@nume_user";
+            a.SqlDbType = SqlDbType.Text;
+            a.Value = nume_user;
+            cmd.Parameters.Add(a);
+
+            SqlParameter b = new SqlParameter();
+            b.ParameterName = "@parola";
+            b.SqlDbType = SqlDbType.Text;
+            b.Value = parola;
+            cmd.Parameters.Add(b);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@id_permisiune";
+            c.SqlDbType = SqlDbType.Int;
+            c.Value = id_permisiune;
+            cmd.Parameters.Add(c);
+
+
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
+        public void delete_user(int id_user)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.delete_user";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter e = new SqlParameter();
+            e.ParameterName = "@id_user";
+            e.SqlDbType = SqlDbType.Int;
+            e.Value = id_user;
+            cmd.Parameters.Add(e);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
+        public void update_user(int id_user,String nume_user, String parola, int id_permisiune)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.update_user";
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@id_user";
+            a.SqlDbType = SqlDbType.Int;
+            a.Value = id_user;
+            cmd.Parameters.Add(a);
+
+            SqlParameter b = new SqlParameter();
+            b.ParameterName = "@nume_user";
+            b.SqlDbType = SqlDbType.Text;
+            b.Value = nume_user;
+            cmd.Parameters.Add(b);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@parola";
+            c.SqlDbType = SqlDbType.Text;
+            c.Value = parola;
+            cmd.Parameters.Add(c);
+
+            SqlParameter e = new SqlParameter();
+            e.ParameterName = "@id_permisiune";
+            e.SqlDbType = SqlDbType.Int;
+            e.Value = id_permisiune;
+            cmd.Parameters.Add(e);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
+        public DataTable afisare_studenti()
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT dbo.tabel_studenti.nume, dbo.tabel_studenti.prenume,dbo.tabel_studenti.id_student,dbo.tabel_studenti.id_user,dbo.tabel_grupe.id_grupa FROM dbo.tabel_studenti INNER JOIN dbo.tabel_grupe ON dbo.tabel_studenti.id_grupa=dbo.tabel_grupe.id_grupa ";
+            cmd.CommandType = CommandType.Text;
+            connection.Open();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
+            connection.Close();
+            return dt;
+        }
+        public DataTable afis_std()
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "Select * from dbo.tabel_studenti";
+            cmd.CommandType = CommandType.Text;
+            connection.Open();
+            var aux = cmd.ExecuteReader(); //citesc cele 2 coloane din tabel
+            DataTable dt = new DataTable();
+            dt.Load(aux);
+            connection.Close();
+            return dt;
+        }
+        public void agaugare_std_la_materie(int materie, int student, int prof, string nume_materie)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.add_std_la_materie";
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@materie";
+            a.SqlDbType = SqlDbType.Int;
+            a.Value = materie;
+            cmd.Parameters.Add(a);
+
+            SqlParameter b = new SqlParameter();
+            b.ParameterName = "@student";
+            b.SqlDbType = SqlDbType.Int;
+            b.Value = student;
+            cmd.Parameters.Add(b);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@prof";
+            c.SqlDbType = SqlDbType.Int;
+            c.Value = prof;
+            cmd.Parameters.Add(c);
+
+            SqlParameter d = new SqlParameter();
+            d.ParameterName = "@nume_materie";
+            d.SqlDbType = SqlDbType.Text;
+            d.Value = nume_materie;
+            cmd.Parameters.Add(d);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
      
         public DataTable afisare_profesori()
         {
@@ -264,7 +385,40 @@ namespace d_layer
             connection.Close();
             return dt;
         }
-        
+        public void add_student(String nume, String prenume, int id_grupa,int id_user)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.add_student";
+            cmd.CommandType = CommandType.StoredProcedure;
+            SqlParameter a = new SqlParameter();
+            a.ParameterName = "@nume";
+            a.SqlDbType = SqlDbType.Text;
+            a.Value = nume;
+            cmd.Parameters.Add(a);
+
+            SqlParameter b = new SqlParameter();
+            b.ParameterName = "@prenume";
+            b.SqlDbType = SqlDbType.Text;
+            b.Value = prenume;
+            cmd.Parameters.Add(b);
+
+            SqlParameter c = new SqlParameter();
+            c.ParameterName = "@id_grupa";
+            c.SqlDbType = SqlDbType.Int;
+            c.Value = id_grupa;
+            cmd.Parameters.Add(c);
+
+            SqlParameter d = new SqlParameter();
+            d.ParameterName = "@id_user";
+            d.SqlDbType = SqlDbType.Int;
+            d.Value = id_user;
+            cmd.Parameters.Add(d);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        }
         public void add_profesor(String nume, String prenume,int id_user)
         {
             initializare_conn();
@@ -293,7 +447,26 @@ namespace d_layer
             cmd.ExecuteReader();
             connection.Close();
         }
-       
+        public void delete_student(int id_std)
+        {
+            initializare_conn();
+            SqlCommand cmd = connection.CreateCommand();
+            cmd.CommandText = "dbo.delete_student";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            SqlParameter e = new SqlParameter();
+            e.ParameterName = "@id_student";
+            e.SqlDbType = SqlDbType.Int;
+            e.Value = id_std;
+            cmd.Parameters.Add(e);
+
+            connection.Open();
+            cmd.ExecuteReader();
+            connection.Close();
+        
+
+
+        }
         public void delete_profesor(int id_stud)
         {
             initializare_conn();
